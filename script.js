@@ -22,7 +22,10 @@ chatForm.addEventListener("submit", async (e) => {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
   // Show "typing..." message
-  chatWindow.innerHTML += `<div class="msg ai typing">...</div>`;
+  const typingEl = document.createElement("div");
+  typingEl.className = "msg ai typing";
+  typingEl.textContent = "...";
+  chatWindow.appendChild(typingEl);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
   try {
@@ -42,10 +45,10 @@ chatForm.addEventListener("submit", async (e) => {
     });
 
     const data = await response.json();
-    const aiMessage = data.choices?.[0]?.message?.content || "Sorry, I couldn’t generate a response.";
+    const aiMessage = data.reply || "Sorry, I couldn’t generate a response.";
 
     // Remove typing placeholder
-    document.querySelector(".typing")?.remove();
+    typingEl.remove();
 
     // Display AI response
     chatWindow.innerHTML += `<div class="msg ai">${aiMessage}</div>`;
@@ -54,7 +57,7 @@ chatForm.addEventListener("submit", async (e) => {
   } catch (error) {
     console.error("Error:", error);
 
-    document.querySelector(".typing")?.remove();
+    typingEl.remove();
     chatWindow.innerHTML += `<div class="msg ai error">⚠️ Something went wrong. Please try again.</div>`;
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
