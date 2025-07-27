@@ -1,0 +1,5 @@
+name = "loreal-chatbot"
+type = "module"
+main = "worker.js"
+compatibility_date = "2024-07-01"
+
