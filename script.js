@@ -17,7 +17,7 @@ chatForm.addEventListener("submit", async (e) => {
   if (!message) return;
 
   // Display user's message
-  chatWindow.innerHTML += `<div class="msg user">${message}</div>`;
+  chatWindow.innerHTML += `<div class="msg user">${escapeHTML(message)}</div>`;
   userInput.value = "";
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
@@ -28,37 +28,45 @@ chatForm.addEventListener("submit", async (e) => {
   chatWindow.appendChild(typingEl);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
+  // Build message payload
+  const payload = {
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant for L'Oréal. Only answer questions about L'Oréal products, skincare, haircare, fragrances, and routines. Politely decline anything off-topic."
+      },
+      { role: "user", content: message }
+    ]
+  };
+
   try {
     const response = await fetch(CLOUDFLARE_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a helpful assistant for L'Oréal. Only answer questions about L'Oréal products, skincare, haircare, fragrances, and routines. Politely decline anything off-topic."
-          },
-          { role: "user", content: message }
-        ]
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-    const aiMessage = data.reply || "Sorry, I couldn’t generate a response.";
 
     // Remove typing placeholder
     typingEl.remove();
 
-    // Display AI response
-    chatWindow.innerHTML += `<div class="msg ai">${aiMessage}</div>`;
+    const aiMessage = data.reply || "⚠️ Sorry, I couldn’t generate a response.";
+    chatWindow.innerHTML += `<div class="msg ai">${escapeHTML(aiMessage)}</div>`;
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
   } catch (error) {
-    console.error("Error:", error);
-
+    console.error("Fetch error:", error);
     typingEl.remove();
     chatWindow.innerHTML += `<div class="msg ai error">⚠️ Something went wrong. Please try again.</div>`;
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 });
+
+/* Optional: escape HTML to prevent injection */
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, tag => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[tag]
+  ));
+}
