@@ -52,7 +52,7 @@ chatForm.addEventListener("submit", async (e) => {
     // Remove typing placeholder
     typingEl.remove();
 
-    const aiMessage = data.reply || "⚠️ Sorry, I couldn’t generate a response.";
+    const aiMessage = data.reply;
     chatWindow.innerHTML += `<div class="msg ai">${escapeHTML(aiMessage)}</div>`;
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
